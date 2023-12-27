@@ -5,7 +5,6 @@ import asyncio
 from PIL import Image
 import numpy as np
 
-
 LifeBoard = List[List[int]]
 
 

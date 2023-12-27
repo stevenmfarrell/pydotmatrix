@@ -2,7 +2,6 @@ from typing import List
 import asyncio
 import numpy as np
 from scipy.ndimage import convolve
-from PIL import Image
 from pynput import keyboard
 
 from client import IDotMatrixClient
@@ -70,7 +69,15 @@ class LifeEditorState:
             cursor_color = self.CURSOR_COLOR
         await self.client.draw_pixel(cursor_color, pos)
 
-    async def handle_space(self):
+    async def handle_key_press(self, key: keyboard.Key):
+        if key in arrow_keys:
+            await self.handle_arrow_key(key)
+        if key == keyboard.Key.space:
+            await self.handle_space_key()
+        if key == keyboard.Key.enter:
+            await self.handle_enter_key()
+    
+    async def handle_space_key(self):
         pos = self.pos
         board_value = self.board[pos[1], pos[0]]
         if board_value:
@@ -81,7 +88,10 @@ class LifeEditorState:
         im = get_board_img(self.board)
         await self.client.draw_image(im)
         await self.draw_cursor_at_pos(pos)
-        
+
+    async def handle_enter_key(self):
+        running_state = LifeRunningState(self.client)
+        await running_state.enter(self.board)
 
     async def handle_arrow_key(self, key: keyboard.Key):
         pos = self.pos
@@ -108,13 +118,7 @@ class LifeEditorState:
         await self.client.draw_pixel(self.CURSOR_COLOR, self.pos)
         while True:
             key = await key_queue.get()
-            if key in arrow_keys:
-                await self.handle_arrow_key(key)
-            if key == keyboard.Key.space:
-                await self.handle_space()
-            if key == keyboard.Key.enter:
-                running_state = LifeRunningState(self.client)
-                await running_state.enter(self.board)
+            await self.handle_key_press(key)
         
 async def main():
     device = '70A65001-FFFE-8259-B6A8-84E3C2CC930E'
