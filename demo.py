@@ -3,8 +3,10 @@ from client import IDotMatrixClient
 import asyncio
 from PIL import Image
 
+from discover import get_idotmatrix_display_address
+
 async def main():
-    device = '70A65001-FFFE-8259-B6A8-84E3C2CC930E'
+    device = await get_idotmatrix_display_address()
     #device = await get_idotmatrix_display()
     async with IDotMatrixClient(device) as client:
         await client.enter_diy_mode()

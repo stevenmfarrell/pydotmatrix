@@ -5,6 +5,7 @@ from scipy.ndimage import convolve
 from pynput import keyboard
 
 from client import IDotMatrixClient
+from discover import get_idotmatrix_display_address
 from life_util import get_board_img, get_new_pos, transmit_keys, arrow_keys
 
 LifeBoard = List[List[int]]
@@ -121,7 +122,7 @@ class LifeEditorState:
             await self.handle_key_press(key)
         
 async def main():
-    device = '70A65001-FFFE-8259-B6A8-84E3C2CC930E'
+    device = await get_idotmatrix_display_address()
     board = get_initial_board()
     async with IDotMatrixClient(device) as client:
         await client.enter_diy_mode()

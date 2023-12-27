@@ -1,27 +1,21 @@
 from client import IDotMatrixClient
-#from discover import get_idotmatrix_display
 import asyncio
 from pynput import keyboard
+from discover import get_idotmatrix_display_address
 
 
 def transmit_keys():
     # https://stackoverflow.com/questions/64658835/how-to-combine-callback-based-library-with-asyncio-library-in-python
-    # Start a keyboard listener that transmits keypresses into an
-    # asyncio queue, and immediately return the queue to the caller.
     queue = asyncio.Queue()
     loop = asyncio.get_event_loop()
     def on_press(key):
-        # this callback is invoked from another thread, so we can't
-        # just queue.put_nowait(key.char), we have to go through
-        # call_soon_threadsafe
         loop.call_soon_threadsafe(queue.put_nowait, key)
     keyboard.Listener(on_press=on_press).start()
     return queue
 
 
 async def main():
-    device = '70A65001-FFFE-8259-B6A8-84E3C2CC930E'
-    #device = await get_idotmatrix_display()
+    device = await get_idotmatrix_display_address()
     color = (255, 0, 0)
     BLACK = (0, 0, 0)
     pos = (8, 8)
