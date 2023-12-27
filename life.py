@@ -39,11 +39,19 @@ class LifeRunningState:
 
     async def enter(self, initial_board: LifeBoard):
         board = initial_board
+        key_queue = transmit_keys()
         while True:
             im = get_board_img(board)
             await self.client.draw_image(im)
             await asyncio.sleep(self.delay)
             board = next_life_generation(board)
+            try:
+                key = key_queue.get_nowait()
+                if key == keyboard.Key.enter:
+                    running_state = LifeEditorState(self.client)
+                    await running_state.enter(initial_board)
+            except asyncio.QueueEmpty:
+                pass
 
 
 class LifeEditorState:
@@ -105,7 +113,6 @@ class LifeEditorState:
             if key == keyboard.Key.space:
                 await self.handle_space()
             if key == keyboard.Key.enter:
-                print('enter')
                 running_state = LifeRunningState(self.client)
                 await running_state.enter(self.board)
         
@@ -114,8 +121,6 @@ async def main():
     board = get_initial_board()
     async with IDotMatrixClient(device) as client:
         await client.enter_diy_mode()
-        #running_state = LifeRunningState(client)
-        #await running_state.enter(board)
         editor_state = LifeEditorState(client)
         await editor_state.enter(board)
 
